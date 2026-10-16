@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f8fc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Recall English">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<title>Recall English</title>
+<style>
+:root{--bg:#f7f8fc;--card:#fff;--ink:#172033;--muted:#6c7688;--line:#e4e8ef;--accent:#3559ff;--green:#16834b;--amber:#a56b00;--red:#ba3535;}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Hiragino Sans","Yu Gothic",sans-serif}
+body{min-height:100dvh}button,input,select,textarea{font:inherit}button{-webkit-tap-highlight-color:transparent}
+.app{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 10px) 14px calc(92px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 2px 10px}
+.brand{font-size:22px;font-weight:800}.sub{font-size:12px;color:var(--muted);margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin:10px 0;box-shadow:0 5px 18px rgba(20,30,60,.04)}
+.hero{padding:19px}.hero h2{margin:0 0 7px;font-size:24px}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:#f6f8fc;border-radius:14px;padding:12px}.stat b{display:block;font-size:22px;margin-top:3px}
+.btn{border:0;border-radius:14px;padding:13px 15px;font-weight:750;background:#eef1f7;color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff}.btn.danger{background:#fdeaea;color:#9c2b2b}.btn.wide{width:100%}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
+select,input[type=text],input[type=number],textarea{width:100%;border:1px solid #cfd6e2;border-radius:13px;padding:12px;background:#fff;color:var(--ink);-webkit-text-fill-color:var(--ink);opacity:1}
+textarea{min-height:150px;resize:vertical}input::placeholder,textarea::placeholder{color:#8b95a6;opacity:1}
+.chips{display:flex;gap:7px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px;font-size:13px}.chip.active{background:#edf0ff;border-color:#aab8ff;color:#2444db;font-weight:750}
+.screen{display:none}.screen.active{display:block}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.qcount{font-size:13px;color:var(--muted)}
+.prompt{font-size:24px;font-weight:800;line-height:1.45;margin:18px 0 20px}
+.answer{font-size:21px!important;padding:15px!important}.rating{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.rate{border:2px solid var(--line);background:#fff;border-radius:14px;padding:11px 6px;font-weight:850;color:var(--ink)}.rate span{display:block;font-size:10px;color:var(--muted);font-weight:600;margin-top:3px}
+.rate.a.selected{background:#e8f7ef;border-color:#56b984;color:#12693d}.rate.b.selected{background:#fff5db;border-color:#d6aa3a;color:#8a6000}.rate.c.selected{background:#fdeaea;border-color:#dc6868;color:#9c2d2d}
+.feedback{display:none;margin-top:14px;padding:13px;border-radius:14px;background:#f6f8fc;line-height:1.55}.feedback.show{display:block}.good{color:var(--green)}.bad{color:var(--red)}
+.explain{margin-top:10px;padding:12px 13px;border-left:4px solid #aeb9d4;background:#fafbfe;border-radius:8px}
+.gptbox{margin-top:12px;background:#f2f4ff;border:1px solid #d8defe;border-radius:14px;padding:12px}.gptbox.hidden{display:none}
+.toolbar{display:flex;gap:8px;margin-top:14px}.toolbar .btn{flex:1}
+.list{display:flex;flex-direction:column;gap:8px}.itemrow{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}.itemrow strong{font-size:14px}.tag{display:inline-block;font-size:10px;padding:3px 7px;border-radius:999px;background:#eef1f7;color:#5f6a7d;margin-left:5px}
+table{width:100%;border-collapse:collapse}th,td{padding:9px 5px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}th{color:var(--muted)}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:7px 10px calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:50}
+.navin{max-width:720px;width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.navbtn{border:0;background:transparent;border-radius:12px;padding:8px 2px;color:#667085;font-size:11px}.navbtn b{display:block;font-size:19px;line-height:1.1;margin-bottom:3px}.navbtn.active{background:#eef1ff;color:#2947dc;font-weight:750}
+.modalbg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;align-items:flex-end;justify-content:center}.modalbg.show{display:flex}.modal{width:min(720px,100%);max-height:86dvh;overflow:auto;background:#fff;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}.notice{font-size:12px;line-height:1.5;background:#fff8dd;border:1px solid #ead37d;border-radius:13px;padding:11px;color:#705700}
+.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#eef1f7;border-radius:5px;padding:1px 5px}
+@media(min-width:640px){.app{padding-left:20px;padding-right:20px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div><div class="brand">Recall English</div><div class="sub">完全無料・オフライン学習｜公開用・個人履歴なし</div></div><button class="btn" id="installHelp">iPhoneに追加</button></header>
+
+<section id="home" class="screen active">
+  <div class="card hero">
+    <div class="small">今日のおすすめ</div>
+    <h2 id="todayTitle">復習から始めましょう</h2>
+    <div class="muted" id="todayDesc"></div>
+    <div style="height:14px"></div>
+    <button class="btn primary wide" id="startToday">今日のLessonを開始</button>
+  </div>
+  <div class="grid">
+    <div class="stat"><span class="small">学習済み</span><b id="sLearned">0</b></div>
+    <div class="stat"><span class="small">今日復習</span><b id="sDue">0</b></div>
+    <div class="stat"><span class="small">苦手</span><b id="sWeak">0</b></div>
+  </div>
+  <div class="card">
+    <strong>分野を選ぶ</strong><div class="small" style="margin:5px 0 10px">次Lessonの新規問題に反映します。</div>
+    <div class="chips" id="categoryChips"></div>
+  </div>
+  <div class="card">
+    <strong>学習設定</strong>
+    <div class="row" style="margin-top:10px">
+      <label class="small">新規/日<input type="number" id="newPerDay" min="0" max="10" value="5"></label>
+      <label class="small">最大問題数<input type="number" id="maxPerDay" min="3" max="30" value="12"></label>
+    </div>
+  </div>
+</section>
+
+<section id="study" class="screen">
+  <div class="card">
+    <div class="qhead"><button class="btn" id="quitStudy">←</button><div class="qcount" id="qCount"></div><span class="small" id="qCat"></span></div>
+    <div class="prompt" id="qPrompt"></div>
+    <input class="answer" id="answerInput" type="text" placeholder="英語だけ入力" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="rating">
+      <button class="rate a" data-rating="A">A<span>5秒以内</span></button>
+      <button class="rate b" data-rating="B">B<span>5秒超</span></button>
+      <button class="rate c" data-rating="C">C<span>出なかった</span></button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="toolbar">
+      <button class="btn" id="showAnswer">答えを見る</button>
+      <button class="btn primary" id="nextQuestion">次へ</button>
+    </div>
+  </div>
+</section>
+
+<section id="progress" class="screen">
+  <div class="card"><h3 style="margin-top:0">進捗</h3>
+    <div class="grid">
+      <div class="stat"><span class="small">A</span><b id="pA">0</b></div>
+      <div class="stat"><span class="small">B</span><b id="pB">0</b></div>
+      <div class="stat"><span class="small">C</span><b id="pC">0</b></div>
+    </div>
+  </div>
+  <div class="card"><h3>Weak Items</h3><div class="list" id="weakList"></div></div>
+  <div class="card"><h3>Lesson History</h3><table><thead><tr><th>Lesson</th><th>日付</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="histBody"></tbody></table></div>
+</section>
+
+<section id="library" class="screen">
+  <div class="card">
+    <h3 style="margin-top:0">Item Bank</h3>
+    <div class="row">
+      <select id="libCategory"></select>
+      <input type="text" id="libSearch" placeholder="日本語・英語で検索">
+    </div>
+  </div>
+  <div class="list" id="libraryList"></div>
+  <div class="card">
+    <h3>自分で追加</h3>
+    <input type="text" id="addJa" placeholder="日本語">
+    <div style="height:8px"></div><input type="text" id="addEn" placeholder="英語">
+    <div style="height:8px"></div><input type="text" id="addCat" placeholder="カテゴリ（例：会議）">
+    <div style="height:10px"></div><button class="btn primary wide" id="addItem">追加</button>
+  </div>
+</section>
+
+<section id="gpt" class="screen">
+  <div class="card">
+    <h3 style="margin-top:0">GPT連携</h3>
+    <div class="notice">通常学習はこのアプリだけで完結します。説明が不足する問題、同じ間違いが続く問題、専門的な表現だけGPTに相談する設計です。</div>
+  </div>
+  <div class="card">
+    <strong>開くChatGPTチャット</strong>
+    <p class="small">この英語学習チャットのURLを一度登録すると、「GPTに聞く」で同じ会話を開けます。未登録ならChatGPTトップを開きます。</p>
+    <input type="text" id="chatUrl" placeholder="https://chatgpt.com/c/...">
+    <div style="height:8px"></div><button class="btn wide" id="saveChatUrl">URLを保存</button>
+  </div>
+  <div class="card">
+    <strong>GPTに学習状況を渡す</strong>
+    <p class="small">現在のItem Bank・履歴・苦手・設定を、GPTが理解できるJSON付き文章としてコピーします。</p>
+    <button class="btn primary wide" id="copyForGpt">GPT用データをコピー</button>
+    <div style="height:8px"></div>
+    <button class="btn wide" id="openGpt">ChatGPTを開く</button>
+  </div>
+  <div class="card">
+    <strong>GPTから学習内容を統合</strong>
+    <p class="small">GPTから受け取ったJSONを貼ると、既存履歴を消さずに教材・解説・Lessonを追加できます。</p>
+    <textarea id="gptImport" placeholder='{"type":"recall_english_patch","items":[...]}'></textarea>
+    <div style="height:8px"></div><button class="btn primary wide" id="mergeGpt">GPTデータを統合</button>
+  </div>
+  <div class="card">
+    <strong>バックアップ</strong>
+    <div class="row" style="margin-top:10px"><button class="btn" id="exportBackup">JSON保存</button><label class="btn" style="text-align:center">JSON読込<input id="importBackup" type="file" accept=".json" hidden></label></div>
+  </div>
+</section>
+</div>
+
+<nav class="bottomnav"><div class="navin">
+<button class="navbtn active" data-screen="home"><b>⌂</b>今日</button>
+<button class="navbtn" data-screen="progress"><b>◫</b>進捗</button>
+<button class="navbtn" data-screen="library"><b>▤</b>教材</button>
+<button class="navbtn" data-screen="gpt"><b>✦</b>GPT</button>
+</div></nav>
+
+<div class="modalbg" id="modalBg"><div class="modal" id="modal"></div></div>
+
+<script>
+const SEED = {"items":[{"id":"P0001","ja":"私はこれが必要です","en":"I need this.","category":"基礎","type":"表現","explanation":"this だけで「これ」を表すので、it は足しません。"},{"id":"P0002","ja":"確認します","en":"I'll check.","category":"仕事","type":"表現","explanation":"I'll = I will。会議では「確認します」の定番表現として塊で覚えます。"},{"id":"P0003","ja":"分かりません／知りません","en":"I don't know.","category":"基礎","type":"表現","explanation":"情報を『知らない』ときは know。説明を『理解できない』ときは understand を使います。"},{"id":"P0004","ja":"もう一度言ってください","en":"Please say that again.","category":"会議","type":"表現","explanation":"that again =「それをもう一度」。more time は「もっと時間」なので別物です。"},{"id":"P0005","ja":"もっと時間が必要です","en":"I need more time.","category":"基礎","type":"表現","explanation":"more time =「もっと時間」。again =「もう一度」と区別します。"},{"id":"G0001","ja":"私は忙しいです","en":"I'm busy.","alternatives":["I am busy."],"category":"文法","type":"文法","explanation":"busy は状態を表す形容詞なので、I busy ではなく I am busy とします。"},{"id":"P0006","ja":"理解できません","en":"I don't understand.","category":"会議","type":"表現","explanation":"相手の説明・英語が理解できないときは I don't understand. を使います。"},{"id":"P0007","ja":"もう一度説明してもらえますか","en":"Could you explain that again?","category":"会議","type":"表現","explanation":"Could you ...? は丁寧な依頼。explain that again =「それをもう一度説明する」。"},{"id":"P0008","ja":"質問があります","en":"I have a question.","category":"会議","type":"表現","explanation":"have a question で「質問がある」。"},{"id":"P0009","ja":"もう少しゆっくり話してもらえますか","en":"Could you speak more slowly?","category":"会議","type":"表現","explanation":"speak more slowly =「もっとゆっくり話す」。"},{"id":"P0010","ja":"私はそう思います","en":"I think so.","category":"会議","type":"表現","explanation":"so は直前の内容全体を受けて「そう」と表します。"},{"id":"P0011","ja":"私はそう思いません","en":"I don't think so.","category":"会議","type":"表現","explanation":"I think so. の否定は I don't think so.。"},{"id":"P0012","ja":"少し待ってください","en":"Please wait a moment.","category":"基礎","type":"表現","explanation":"a moment =「少しの間」。"},{"id":"P0013","ja":"同意します","en":"I agree.","category":"会議","type":"表現","explanation":"agree は「同意する」。I am agree とはしません。"},{"id":"P0014","ja":"一つ懸念があります","en":"I have one concern.","category":"会議","type":"表現","explanation":"concern =「懸念・心配」。会議で反対意見を柔らかく始めるのに便利です。"},{"id":"P0015","ja":"主な問題はスケジュールです","en":"The main issue is the schedule.","category":"会議","type":"表現","explanation":"The main issue is ... =「主な問題は〜です」。"},{"id":"P0016","ja":"どういう意味ですか","en":"What do you mean?","category":"会議","type":"表現","explanation":"相手の意図を確認する基本表現です。"},{"id":"P0017","ja":"例を挙げてもらえますか","en":"Could you give me an example?","category":"会議","type":"表現","explanation":"give me an example =「例を挙げる」。"},{"id":"P0018","ja":"確認させてください","en":"Let me check.","category":"会議","type":"表現","explanation":"Let me ... =「私に〜させてください」。"},{"id":"P0019","ja":"それで大丈夫です","en":"That's fine.","category":"会議","type":"表現","explanation":"fine はここでは「問題ない・大丈夫」。"},{"id":"P0020","ja":"まだ分かりません","en":"I'm not sure yet.","category":"会議","type":"表現","explanation":"not sure =「確信がない」。yet =「まだ」。"},{"id":"P0021","ja":"後で回答します","en":"I'll answer later.","category":"会議","type":"表現","explanation":"later =「後で」。I'll ... で「〜します」。"},{"id":"P0022","ja":"もう一度確認してもいいですか","en":"Can I check that again?","category":"会議","type":"表現","explanation":"Can I ...? =「〜してもいいですか」。"},{"id":"P0023","ja":"私の理解では、〜です","en":"My understanding is that ...","category":"会議","type":"表現","explanation":"会議で自分の理解を確認するときの定番導入です。","gptRecommended":true},{"id":"P0030","ja":"これは何ですか","en":"What is this?","category":"基礎","type":"表現","explanation":"What is this? =「これは何ですか」。"},{"id":"P0031","ja":"これはいくらですか","en":"How much is this?","category":"旅行","type":"表現","explanation":"How much ...? = 値段を尋ねる表現。"},{"id":"P0032","ja":"トイレはどこですか","en":"Where is the restroom?","category":"旅行","type":"表現","explanation":"Where is ...? =「〜はどこですか」。"},{"id":"P0033","ja":"これをお願いします","en":"This one, please.","category":"旅行","type":"表現","explanation":"店やレストランで指しながら使える短い表現です。"},{"id":"P0034","ja":"カードは使えますか","en":"Can I pay by card?","category":"旅行","type":"表現","explanation":"pay by card =「カードで支払う」。"},{"id":"P0035","ja":"予約しています","en":"I have a reservation.","category":"旅行","type":"表現","explanation":"have a reservation =「予約している」。"},{"id":"P0036","ja":"助けてもらえますか","en":"Could you help me?","category":"基礎","type":"表現","explanation":"Could you ...? で丁寧に依頼できます。"},{"id":"P0037","ja":"英語はあまり話せません","en":"I don't speak English well.","category":"旅行","type":"表現","explanation":"well は「上手に」。完璧な文法より、短く伝えることを優先します。"},{"id":"P0038","ja":"もう一度お願いします","en":"One more time, please.","category":"旅行","type":"表現","explanation":"短く言いたいときの実用表現。会議では Please say that again. も使います。"},{"id":"P0039","ja":"分かりました","en":"I understand.","category":"基礎","type":"表現","explanation":"I don't understand. の肯定形です。"},{"id":"P0040","ja":"大丈夫です","en":"I'm okay.","category":"基礎","type":"表現","explanation":"自分の状態について「大丈夫です」と言う表現。"},{"id":"P0050","ja":"メールを送ります","en":"I'll send an email.","category":"仕事","type":"表現","explanation":"I'll + 動詞 で「〜します」。"},{"id":"P0051","ja":"資料を確認します","en":"I'll check the document.","category":"仕事","type":"表現","explanation":"check + 名詞 =「〜を確認する」。"},{"id":"P0052","ja":"今日中に対応します","en":"I'll handle it today.","category":"仕事","type":"表現","explanation":"handle =「対応する」。today を最後に置けます。"},{"id":"P0053","ja":"いつまでに必要ですか","en":"When do you need it?","category":"仕事","type":"表現","explanation":"When do you need it? = 必要期限を確認する定番表現。"},{"id":"P0054","ja":"何か問題がありますか","en":"Is there any problem?","category":"仕事","type":"表現","explanation":"Is there ...? =「〜がありますか」。"},{"id":"P0055","ja":"問題ありません","en":"No problem.","category":"仕事","type":"表現","explanation":"短く「問題ありません」。"},{"id":"P0056","ja":"これは重要です","en":"This is important.","category":"仕事","type":"表現","explanation":"important は形容詞なので is が必要です。"},{"id":"P0057","ja":"締め切りは金曜日です","en":"The deadline is Friday.","category":"仕事","type":"表現","explanation":"deadline =「締め切り」。"},{"id":"P0058","ja":"状況を教えてください","en":"Please tell me the status.","category":"仕事","type":"表現","explanation":"status =「状況・進捗」。"},{"id":"P0059","ja":"後で確認します","en":"I'll check it later.","category":"仕事","type":"表現","explanation":"later =「後で」。"},{"id":"P0060","ja":"この資料を共有してください","en":"Please share this document.","category":"仕事","type":"表現","explanation":"share + 名詞 =「〜を共有する」。"},{"id":"P0070","ja":"電源に問題があります","en":"There is a power issue.","category":"データセンター","type":"表現","explanation":"There is ... =「〜があります」。power issue = 電源の問題。"},{"id":"P0071","ja":"停電がありました","en":"There was a power outage.","category":"データセンター","type":"表現","explanation":"power outage =「停電」。was は過去の「ありました」。"},{"id":"P0072","ja":"原因を確認します","en":"I'll check the cause.","category":"データセンター","type":"表現","explanation":"cause =「原因」。"},{"id":"P0073","ja":"温度を確認してください","en":"Please check the temperature.","category":"データセンター","type":"表現","explanation":"temperature =「温度」。"},{"id":"P0074","ja":"作業は完了しました","en":"The work is complete.","category":"データセンター","type":"表現","explanation":"complete はここでは「完了した状態」。"},{"id":"P0075","ja":"作業は予定どおりです","en":"The work is on schedule.","category":"データセンター","type":"表現","explanation":"on schedule =「予定どおり」。"},{"id":"P0076","ja":"遅延があります","en":"There is a delay.","category":"データセンター","type":"表現","explanation":"delay =「遅延」。"},{"id":"P0077","ja":"安全を確認してください","en":"Please check the safety.","category":"データセンター","type":"表現","explanation":"実務ではより具体的な言い方が必要な場合があります。","gptRecommended":true},{"id":"P0078","ja":"バックアップ電源があります","en":"We have backup power.","category":"データセンター","type":"表現","explanation":"backup power =「バックアップ電源」。"},{"id":"P0079","ja":"サーバーを停止する必要があります","en":"We need to stop the server.","category":"データセンター","type":"表現","explanation":"need to + 動詞 =「〜する必要がある」。"},{"id":"G0010","ja":"私は準備できています","en":"I'm ready.","alternatives":["I am ready."],"category":"文法","type":"文法","explanation":"ready は形容詞なので be動詞 am が必要です。"},{"id":"G0011","ja":"これは難しいです","en":"This is difficult.","category":"文法","type":"文法","explanation":"difficult は形容詞なので This difficult ではなく This is difficult.。"},{"id":"G0012","ja":"彼は忙しいです","en":"He is busy.","category":"文法","type":"文法","explanation":"he には is を使います。"},{"id":"G0013","ja":"私はこの資料を知っています","en":"I know this document.","category":"文法","type":"文法","explanation":"know は一般動詞なので am は付けません。"},{"id":"G0014","ja":"彼はこの問題を知っています","en":"He knows this problem.","category":"文法","type":"文法","explanation":"主語が he の現在形では know → knows。"}],"progress":{},"history":[]};
+const KEY="recallEnglishPwa_public_v1";
+function localDateString(d=new Date()){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+const TODAY=localDateString();
+const ALL_CATS=["基礎","会議","仕事","旅行","データセンター","文法"];
+
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function load(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw) return {...clone(SEED), settings:{categories:["基礎","会議"],newPerDay:5,maxPerDay:12,chatUrl:""}, customLessonNo:2};
+  const db=JSON.parse(raw);
+  db.settings ||= {categories:["基礎","会議"],newPerDay:5,maxPerDay:12,chatUrl:""};
+  db.items ||= [];
+  db.progress ||= {};
+  db.history ||= [];
+  db.customLessonNo ||= 2;
+  // merge built-in content without overwriting user edits
+  SEED.items.forEach(it=>{if(!db.items.find(x=>x.id===it.id)) db.items.push(clone(it));});
+  return db;
+}
+let db=load();
+function save(){localStorage.setItem(KEY,JSON.stringify(db));}
+
+function norm(s){
+  return (s||"").toLowerCase().replace(/[’‘]/g,"'").replace(/[.,!?]/g,"").replace(/\s+/g," ").trim();
+}
+function correct(input,item){
+  const opts=[item.en,...(item.alternatives||[])].map(norm);
+  return opts.includes(norm(input));
+}
+function addDays(dateStr,days){const d=new Date((dateStr||TODAY)+"T12:00:00");d.setDate(d.getDate()+days);return d.toISOString().slice(0,10)}
+function nextDue(p,rating,isCorrect){
+  if(!isCorrect || rating==="C") return addDays(TODAY,1);
+  if(rating==="B") return addDays(TODAY,1);
+  const streak=(p.streak||0)+1;
+  const intervals=[1,3,7,14,30,60,120];
+  return addDays(TODAY, intervals[Math.min(streak,intervals.length-1)]);
+}
+function getP(id){return db.progress[id]||{attempts:0,wrong:0,streak:0,due:TODAY}}
+function isWeak(id){
+  const p=db.progress[id];
+  return !!p && (p.correct===false || p.rating==="B" || p.rating==="C" || (p.wrong||0)>=2);
+}
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(x=>x.classList.toggle("active",x.id===id));
+  document.querySelectorAll(".navbtn").forEach(x=>x.classList.toggle("active",x.dataset.screen===id));
+  if(id==="home") renderHome();
+  if(id==="progress") renderProgress();
+  if(id==="library") renderLibrary();
+}
+document.querySelectorAll(".navbtn").forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+
+function renderCats(){
+  const wrap=document.getElementById("categoryChips");wrap.innerHTML="";
+  ALL_CATS.forEach(c=>{
+    const b=document.createElement("button");b.className="chip"+(db.settings.categories.includes(c)?" active":"");b.textContent=c;
+    b.onclick=()=>{const s=new Set(db.settings.categories);s.has(c)?s.delete(c):s.add(c);if(!s.size)s.add("基礎");db.settings.categories=[...s];save();renderCats();};
+    wrap.appendChild(b);
+  });
+}
+function stats(){
+  const ps=Object.values(db.progress);
+  return {
+    learned:ps.filter(p=>p.attempts>0).length,
+    due:Object.values(db.progress).filter(p=>p.due<=TODAY).length,
+    weak:Object.keys(db.progress).filter(isWeak).length,
+    A:ps.filter(p=>p.rating==="A").length,B:ps.filter(p=>p.rating==="B").length,C:ps.filter(p=>p.rating==="C").length
+  }
+}
+function renderHome(){
+  const s=stats();
+  sLearned.textContent=s.learned;sDue.textContent=s.due;sWeak.textContent=s.weak;
+  const due=buildQueue(false).filter(x=>x.kind==="review").length;
+  todayTitle.textContent=due?`復習 ${due}問 + 新規`: "新しい表現を少しずつ";
+  todayDesc.textContent=`${db.settings.categories.join("・")}から、復習を優先して最大${db.settings.maxPerDay}問。`;
+  newPerDay.value=db.settings.newPerDay;maxPerDay.value=db.settings.maxPerDay;renderCats();
+}
+newPerDay.onchange=()=>{db.settings.newPerDay=Math.max(0,Math.min(10,+newPerDay.value||0));save();renderHome();};
+maxPerDay.onchange=()=>{db.settings.maxPerDay=Math.max(3,Math.min(30,+maxPerDay.value||12));save();renderHome();};
+
+function buildQueue(commit=true){
+  const max=db.settings.maxPerDay, nnew=db.settings.newPerDay, cats=db.settings.categories;
+  let review=db.items.filter(it=>db.progress[it.id] && db.progress[it.id].due<=TODAY)
+    .sort((a,b)=>{const pa=getP(a.id),pb=getP(b.id);return (isWeak(b.id)-isWeak(a.id)) || pa.due.localeCompare(pb.due)});
+  const seen=new Set(review.map(x=>x.id));
+  let weak=db.items.filter(it=>isWeak(it.id)&&!seen.has(it.id)).slice(0,Math.max(0,max-review.length));
+  weak.forEach(x=>seen.add(x.id));
+  let fresh=db.items.filter(it=>!db.progress[it.id] && cats.includes(it.category) && !seen.has(it.id)).slice(0,nnew);
+  let arr=[...review.map(x=>({...x,kind:"review"})),...weak.map(x=>({...x,kind:"weak"})),...fresh.map(x=>({...x,kind:"new"}))].slice(0,max);
+  if(!arr.length) fresh=db.items.filter(it=>!db.progress[it.id]).slice(0,Math.min(nnew,max)).map(x=>({...x,kind:"new"})),arr=fresh;
+  return arr;
+}
+
+let session={queue:[],i:0,answers:[]};
+function startLesson(){
+  session={queue:buildQueue(),i:0,answers:[]};
+  if(!session.queue.length) return alert("今日の問題がありません。");
+  showScreen("study"); renderQuestion();
+}
+startToday.onclick=startLesson;
+quitStudy.onclick=()=>{if(confirm("途中で終了しますか？入力中の問題は保存されません。"))showScreen("home");};
+
+function renderQuestion(){
+  const item=session.queue[session.i]; if(!item)return finishLesson();
+  qCount.textContent=`${session.i+1} / ${session.queue.length}`;qCat.textContent=item.category;qPrompt.textContent=item.ja;
+  answerInput.value="";answerInput.disabled=false;answerInput.focus();
+  document.querySelectorAll(".rate").forEach(b=>b.classList.remove("selected"));
+  feedback.className="feedback";feedback.innerHTML="";
+  showAnswer.disabled=false; nextQuestion.disabled=true;
+}
+let selectedRating=null;
+document.querySelectorAll(".rate").forEach(b=>b.onclick=()=>{
+  selectedRating=b.dataset.rating;document.querySelectorAll(".rate").forEach(x=>x.classList.toggle("selected",x===b));
+  evaluate(false);
+});
+showAnswer.onclick=()=>evaluate(true);
+function evaluate(force){
+  const item=session.queue[session.i]; if(!item)return;
+  if(!selectedRating && !force) return;
+  if(force && !selectedRating){selectedRating="C";document.querySelector('.rate.c').classList.add("selected");}
+  const input=answerInput.value.trim(), ok=correct(input,item);
+  const p=getP(item.id);
+  const needsGpt=item.gptRecommended || ((p.wrong||0)>=2) || (!item.explanation);
+  let html=`<div class="${ok?"good":"bad"}"><b>${ok?"✓ 正解":"× 正答: "+item.en}</b></div>`;
+  if(item.explanation) html+=`<div class="explain">${item.explanation}</div>`;
+  if(needsGpt || (!ok && (p.wrong||0)>=1)){
+    html+=`<div class="gptbox"><b>詳しい説明が必要ですか？</b><div class="small" style="margin:5px 0 9px">この問題はGPTに相談すると、あなたの間違い方に合わせて説明できます。</div><button class="btn" onclick="askGpt('${item.id}')">GPTにこの問題を聞く</button></div>`;
+  }
+  feedback.innerHTML=html;feedback.className="feedback show";answerInput.disabled=true;nextQuestion.disabled=false;showAnswer.disabled=true;
+  session.current={itemId:item.id,input,rating:selectedRating,correct:ok};
+}
+nextQuestion.onclick=()=>{
+  if(!session.current)return;
+  session.answers.push(session.current);session.current=null;selectedRating=null;session.i++;renderQuestion();
+};
+answerInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!answerInput.disabled){if(!selectedRating)selectedRating="B";document.querySelector('.rate.b').classList.add("selected");evaluate(false)}else if(e.key==="Enter"&&nextQuestion.disabled===false)nextQuestion.click();});
+
+function finishLesson(){
+  const no=String(db.customLessonNo).padStart(3,"0");db.customLessonNo++;
+  let c={A:0,B:0,C:0};
+  session.answers.forEach(a=>{
+    c[a.rating]++;
+    const p=getP(a.itemId);
+    p.attempts=(p.attempts||0)+1;p.rating=a.rating;p.correct=a.correct;p.last=TODAY;
+    if(a.correct) p.streak=(p.streak||0)+1; else {p.streak=0;p.wrong=(p.wrong||0)+1;}
+    p.due=nextDue(p,a.rating,a.correct);db.progress[a.itemId]=p;
+  });
+  db.history.push({lesson:no,date:TODAY,title:"自動Lesson",A:c.A,B:c.B,C:c.C,answered:session.answers.length});
+  save();
+  const misses=session.answers.filter(a=>!a.correct||a.rating!=="A");
+  modal.innerHTML=`<h2 style="margin-top:0">Lesson ${no} 完了</h2><p>A ${c.A} / B ${c.B} / C ${c.C}</p>
+    <p class="small">苦手・誤答は自動で次回の復習に残しました。</p>
+    ${misses.length?`<div class="notice">${misses.length}項目を重点復習します。</div>`:""}
+    <div style="height:10px"></div><button class="btn primary wide" onclick="closeModal();showScreen('home')">完了</button>`;
+  modalBg.classList.add("show");
+}
+function closeModal(){modalBg.classList.remove("show")}
+modalBg.onclick=e=>{if(e.target===modalBg)closeModal();};
+
+window.askGpt=async function(id){
+  const item=db.items.find(x=>x.id===id),p=getP(id);
+  const text=`英語学習中です。次の問題を私のレベル（基礎、会議で短く伝えることを優先）に合わせて日本語で説明してください。\n\n日本語: ${item.ja}\n正答: ${item.en}\n直近評価: ${p.rating||"未学習"}\n過去の誤答回数: ${p.wrong||0}\n\n文法用語は必要最小限にし、なぜこの形になるのか、似た短い例文を2つ、最後に日本語→英語の確認問題を1問ください。`;
+  await copyText(text);openChat();alert("相談文をコピーしました。ChatGPTで貼り付けてください。");
+}
+
+function renderProgress(){
+  const s=stats();pA.textContent=s.A;pB.textContent=s.B;pC.textContent=s.C;
+  weakList.innerHTML="";
+  const ws=db.items.filter(it=>isWeak(it.id));
+  if(!ws.length) weakList.innerHTML='<div class="small">現在、重点項目はありません。</div>';
+  ws.forEach(it=>{const p=getP(it.id);const d=document.createElement("div");d.className="itemrow";d.innerHTML=`<strong>${it.ja}</strong><span class="tag">${p.rating||"-"}</span><div class="small">${it.en}｜次回 ${p.due}</div>`;weakList.appendChild(d);});
+  histBody.innerHTML="";[...db.history].reverse().forEach(h=>histBody.insertAdjacentHTML("beforeend",`<tr><td>${h.lesson}</td><td>${h.date}</td><td>${h.A}</td><td>${h.B}</td><td>${h.C}</td></tr>`));
+}
+function renderLibrary(){
+  const cats=["すべて",...ALL_CATS,"カスタム"];const old=libCategory.value;libCategory.innerHTML=cats.map(c=>`<option>${c}</option>`).join("");if(cats.includes(old))libCategory.value=old;
+  const q=norm(libSearch.value),cat=libCategory.value||"すべて";
+  const arr=db.items.filter(it=>(cat==="すべて"||it.category===cat||(cat==="カスタム"&&it.custom)) && (!q||norm(it.ja).includes(q)||norm(it.en).includes(q)));
+  libraryList.innerHTML="";arr.forEach(it=>{const p=db.progress[it.id];const d=document.createElement("div");d.className="itemrow";d.innerHTML=`<strong>${it.ja}</strong><span class="tag">${it.category}</span><div>${it.en}</div><div class="small">${p?`評価 ${p.rating} / 次回 ${p.due}`:"未学習"}</div>`;libraryList.appendChild(d);});
+}
+libCategory.onchange=renderLibrary;libSearch.oninput=renderLibrary;
+addItem.onclick=()=>{
+  const ja=addJa.value.trim(),en=addEn.value.trim(),cat=addCat.value.trim()||"カスタム";if(!ja||!en)return alert("日本語と英語を入力してください。");
+  const id="U"+Date.now().toString().slice(-8);db.items.push({id,ja,en,category:cat,type:"表現",custom:true,explanation:""});save();addJa.value=addEn.value=addCat.value="";renderLibrary();alert("追加しました。解説が必要になった場合はGPT相談導線が表示されます。");
+};
+
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);return true}catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();return ok}
+}
+function gptPayload(){
+  const weak=db.items.filter(it=>isWeak(it.id)).map(it=>({id:it.id,ja:it.ja,en:it.en,progress:db.progress[it.id]}));
+  const payload={type:"recall_english_state",version:1,exportedAt:new Date().toISOString(),settings:db.settings,history:db.history,progress:db.progress,weakItems:weak,items:db.items};
+  return `以下は私の英語学習アプリ Recall English の現在データです。過去の学習履歴を保持したまま、必要なら新しい教材・解説・復習方針を提案してください。アプリへ戻すデータが必要な場合は、最後に recall_english_patch 形式のJSONをコードブロック1つで出してください。既存IDを修正する場合は同じID、新規項目は新しいIDを使ってください。\n\n${JSON.stringify(payload,null,2)}`;
+}
+chatUrl.value=db.settings.chatUrl||"";
+saveChatUrl.onclick=()=>{
+  const u=chatUrl.value.trim();
+  if(u && !/^https:\/\/chatgpt\.com\//i.test(u)) return alert("ChatGPTのURLを入力してください。");
+  db.settings.chatUrl=u; save(); alert("保存しました。");
+};
+copyForGpt.onclick=async()=>{await copyText(gptPayload());alert("GPT用データをコピーしました。");};
+function openChat(){window.open(db.settings.chatUrl||"https://chatgpt.com/","_blank")}openGpt.onclick=openChat;
+mergeGpt.onclick=()=>{
+  try{
+    let raw=gptImport.value.trim().replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();const patch=JSON.parse(raw);
+    if(patch.type!=="recall_english_patch")throw new Error("type");
+    (patch.items||[]).forEach(n=>{const i=db.items.findIndex(x=>x.id===n.id);if(i>=0)db.items[i]={...db.items[i],...n};else db.items.push(n);});
+    (patch.progress||[]).forEach(n=>{if(n.id)db.progress[n.id]={...(db.progress[n.id]||{}),...n.progress};});
+    if(Array.isArray(patch.history)) db.history.push(...patch.history);
+    if(patch.settings) db.settings={...db.settings,...patch.settings};
+    save();gptImport.value="";renderHome();alert("GPTの内容を統合しました。既存の学習履歴は保持されています。");
+  }catch(e){alert("JSON形式を確認してください。type は recall_english_patch が必要です。");}
+};
+exportBackup.onclick=()=>{const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`recall-english-backup-${TODAY}.json`;a.click();URL.revokeObjectURL(a.href);};
+importBackup.onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!confirm("現在データをバックアップ内容で置き換えますか？"))return;try{db=JSON.parse(await f.text());save();renderHome();alert("復元しました。")}catch{alert("読込に失敗しました。")}};
+
+installHelp.onclick=()=>{
+  modal.innerHTML=`<h2 style="margin-top:0">iPhoneでアプリ化</h2>
+  <ol style="line-height:1.8;padding-left:22px"><li>このPWAをHTTPSで公開します（GitHub Pages等の無料サービスで可）。</li><li>iPhoneのSafariでURLを開きます。</li><li>共有ボタン → <b>ホーム画面に追加</b>。</li><li>「Webアプリとして開く」が表示される場合は有効にします。</li></ol>
+  <div class="notice">ローカルHTMLを直接開くだけではPWAのオフライン機能が正しく働かないため、最初の1回だけWeb公開が必要です。</div>
+  <div style="height:10px"></div><button class="btn primary wide" onclick="closeModal()">OK</button>`;
+  modalBg.classList.add("show");
+};
+
+if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+renderHome();renderLibrary();
+</script>
+</body>
+</html>
