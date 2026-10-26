@@ -1,24 +1,5 @@
-# Recall English | 1年カリキュラム v2
-
-- **365日×新規5問 = 合計1,825問**。全問に日本語・英文・短い解説を収録。
-- 12か月で、基礎→文法→旅行→会議→意見→メール→工程→データセンター設備→障害・安全→調達→論理→総合へ進みます。
-- 毎日「今日のLessonを開始」で**復習優先＋新規最大5問**（設定変更可）を自動出題します。同日に複数回開始しても新規問題の1日上限を守ります。
-- A=5秒以内、B=5秒超、C=出なかった。正誤とスピードは別管理。
-- 学習履歴や独自追加語彙は各端末の localStorage に保存。アップロードした公開ファイルに個人データは含まれません。
-- 旧Public版の`recallEnglishPwa_public_v1`と同じ保存キーを使うため、**同じURLと同じブラウザ保存領域なら学習履歴を引き継ぎます**。
-- iPhoneホーム画面PWAとSafariが別の保存領域になる場合があります。起動方法は統一してください。
-- 今日の復習が増えた場合も新規問題を出せるよう初期最大問題数を20問に変更しています。未消化の復習は翌日以降に残ります。
-- `curriculum-preview.csv` に全1,825問を載せています。公開に支障のある記述がないか自身でも確認できます。
-- 初回のダウンロードと更新にはネットが必要。以降、オフライン利用可能。
-- 既存のPublic版から更新する際は、まずアプリの「GPT → JSON保存」でバックアップを取ってください。
-
-## GitHub Pagesへの更新
-
-1. ZIPを解凍し、**8ファイルをリポジトリ直下に上書きアップロード**。
-2. `Settings > Pages` が `main` / `/ (root)` のままなら変更不要。
-3. Actionsが成功後、以前と同じURLで開き、必要に応じてアプリを再読み込み。
-4. 新しい問題が表示されない場合、iPhoneで完全にアプリを閉じて再起動。既存サイトデータを消してはいけません。
-
-## 注意
-
-1,825問は「毎日5問なら365日相当の新規問題数」という意味です。復習が多い日・休んだ日・設定でカテゴリを外した日は進度が変わります。自動通知・音声認識・AI自動生成はありません。自動的に次のレッスン問題が組み立てられますが、毎日の開始ボタンは手動です。
+Recall English v4: 1,825 items with curated and rule-based alternate answers.
+Existing progress is retained under localStorage key recallEnglishPwa_public_v1.
+Existing custom alternatives are merged. Each new answer is stored in answerLog (local device).
+No offline ruleset can recognize every semantically valid English sentence.
+Upload all files to the same GitHub Pages repository. Backup current JSON before updating.
