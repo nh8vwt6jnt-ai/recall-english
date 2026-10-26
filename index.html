@@ -103,6 +103,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}.notice{font-size:12p
     </div>
   </div>
   <div class="card"><h3>Weak Items</h3><div class="list" id="weakList"></div></div>
+  <div class="card"><h3>回答分析</h3><p class="small">入力英文・正誤・自己評価を記録。直近の回答と苦手傾向を確認できます。</p><div id="answerStats"></div><div id="answerHistoryList" class="list"></div><button class="btn wide" id="exportAnswersProgress">回答履歴CSVを保存</button></div>
   <div class="card"><h3>Lesson History</h3><table><thead><tr><th>Lesson</th><th>日付</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="histBody"></tbody></table></div>
 </section>
 
@@ -150,7 +151,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}.notice{font-size:12p
   </div>
   <div class="card">
     <strong>バックアップ</strong>
-    <div class="row" style="margin-top:10px"><button class="btn" id="exportBackup">JSON保存</button><label class="btn" style="text-align:center">JSON読込<input id="importBackup" type="file" accept=".json" hidden></label></div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="exportAnswers">回答履歴CSV</button><button class="btn" id="exportBackup">JSON保存</button><label class="btn" style="text-align:center">JSON読込<input id="importBackup" type="file" accept=".json" hidden></label></div>
   </div>
 </section>
 </div>
@@ -185,6 +186,7 @@ function load(){
   db.history ||= [];
   db.customLessonNo ||= 2;
   db.answerLog ||= [];
+db.answerLogVersion = 2;
   if(!db.history.length && !Object.keys(db.progress).length)db.customLessonNo=1;
   if(!db.settings.curriculumV2Initialized){
     if(JSON.stringify(db.settings.categories)==='["基礎","会議"]') db.settings.categories=[...ALL_CATS];
@@ -313,7 +315,7 @@ function evaluate(force){
     html+=`<div class="gptbox"><b>詳しい説明が必要ですか？</b><div class="small" style="margin:5px 0 9px">この問題はGPTに相談すると、あなたの間違い方に合わせて説明できます。</div><button class="btn" onclick="askGpt('${item.id}')">GPTにこの問題を聞く</button></div>`;
   }
   feedback.innerHTML=html;feedback.className="feedback show";answerInput.disabled=true;nextQuestion.disabled=false;showAnswer.disabled=true;
-  session.current={itemId:item.id,input,rating:selectedRating,correct:ok,kind:item.kind};
+  session.current={itemId:item.id,input,rating:selectedRating,correct:ok,kind:item.kind,answeredAt:new Date().toISOString(),reason:classifyAnswer(input,item,ok)};
 }
 nextQuestion.onclick=()=>{
   if(!session.current)return;
@@ -321,13 +323,36 @@ nextQuestion.onclick=()=>{
 };
 answerInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!answerInput.disabled){if(!selectedRating)selectedRating="B";document.querySelector('.rate.b').classList.add("selected");evaluate(false)}else if(e.key==="Enter"&&nextQuestion.disabled===false)nextQuestion.click();});
 
+function classifyAnswer(input,item,ok){
+  if(!input.trim())return "未回答";
+  if(ok)return norm(input)===norm(item.en)?"模範解答":"登録済み別解";
+  const words=input.trim().split(/\s+/);
+  if(words.length<=2 && (item.en||"").trim().split(/\s+/).length>=4)return "短い回答・要確認";
+  return "未登録または誤答（要確認）";
+}
+function csvCell(v){return '"'+String(v??"").replace(/"/g,'""')+'"';}
+function downloadAnswerCSV(){
+ const cols=["date","lesson","itemId","category","ja","answer","modelAnswer","correct","rating","reason"];
+ const labels=["回答日時","Lesson","問題ID","カテゴリ","日本語","入力英文","模範解答","正誤","自己評価","判定区分"];
+ const rows=[labels.map(csvCell).join(","),...(db.answerLog||[]).map(r=>cols.map(k=>csvCell(k==="correct"?(r.correct===true?"正解":"不正解"):r[k])).join(","))];
+ const blob=new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8;"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`recall-english-answers-${localDateString()}.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+function renderAnswerAnalysis(){
+ const log=db.answerLog||[],statsEl=document.getElementById("answerStats"),listEl=document.getElementById("answerHistoryList");
+ if(!statsEl||!listEl)return;
+ const total=log.length,wrong=log.filter(x=>x.correct===false).length,alternatives=log.filter(x=>x.reason==="登録済み別解").length;
+ statsEl.innerHTML=`<p class="small">記録 ${total} 件 / 不正解 ${wrong} 件 / 登録済み別解 ${alternatives} 件</p>`;
+ const recent=log.slice(-30).reverse();
+ listEl.innerHTML=recent.length?recent.map(r=>`<div class="card" style="margin:6px 0;padding:10px"><div class="small">${esc(r.date||"")} · ${esc(r.itemId||"")} · ${r.correct?"✓ 正解":"× 不正解"} · ${esc(r.rating||"")}</div><div>${esc(r.ja||"")}</div><div><b>入力:</b> ${esc(r.answer||"（未入力）")}</div><div class="small">模範: ${esc(r.modelAnswer||"")} / ${esc(r.reason||"分類なし")}</div></div>`).join(""):'<p class="small">回答履歴はまだありません。次のLesson完了時から記録されます。</p>';
+}
 function finishLesson(){
   const no=String(db.customLessonNo).padStart(3,"0");db.customLessonNo++;
   let c={A:0,B:0,C:0};
   session.answers.forEach(a=>{
     c[a.rating]++;
     const source=db.items.find(x=>x.id===a.itemId);
-    db.answerLog.push({date:new Date().toISOString(),itemId:a.itemId,ja:source?.ja||"",answer:a.input,modelAnswer:source?.en||"",correct:a.correct,rating:a.rating});
+    db.answerLog.push({date:a.answeredAt||new Date().toISOString(),itemId:a.itemId,category:source?.category||"",ja:source?.ja||"",answer:a.input,modelAnswer:source?.en||"",correct:a.correct,rating:a.rating,reason:a.reason||"",lesson:no});
     const p=getP(a.itemId);
     p.attempts=(p.attempts||0)+1;p.rating=a.rating;p.correct=a.correct;p.last=TODAY;
     if(a.correct) p.streak=(p.streak||0)+1; else {p.streak=0;p.wrong=(p.wrong||0)+1;}
@@ -352,6 +377,7 @@ window.askGpt=async function(id){
 }
 
 function renderProgress(){
+  renderAnswerAnalysis();
   const s=stats();pA.textContent=s.A;pB.textContent=s.B;pC.textContent=s.C;
   weakList.innerHTML="";
   const ws=db.items.filter(it=>isWeak(it.id));
@@ -398,6 +424,8 @@ mergeGpt.onclick=()=>{
     save();gptImport.value="";renderHome();alert("GPTの内容を統合しました。既存の学習履歴は保持されています。");
   }catch(e){alert("JSON形式を確認してください。type は recall_english_patch が必要です。");}
 };
+document.getElementById("exportAnswers").onclick=downloadAnswerCSV;
+document.getElementById("exportAnswersProgress").onclick=downloadAnswerCSV;
 exportBackup.onclick=()=>{const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`recall-english-backup-${TODAY}.json`;a.click();URL.revokeObjectURL(a.href);};
 importBackup.onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!confirm("現在データをバックアップ内容で置き換えますか？"))return;try{db=JSON.parse(await f.text());save();renderHome();alert("復元しました。")}catch{alert("読込に失敗しました。")}};
 

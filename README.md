@@ -1,5 +1,1 @@
-Recall English v4: 1,825 items with curated and rule-based alternate answers.
-Existing progress is retained under localStorage key recallEnglishPwa_public_v1.
-Existing custom alternatives are merged. Each new answer is stored in answerLog (local device).
-No offline ruleset can recognize every semantically valid English sentence.
-Upload all files to the same GitHub Pages repository. Backup current JSON before updating.
+Recall English v5: 回答履歴CSV・回答別分析を追加。既存localStorageキーと教材を維持。回答原文・正誤・A/B/C・判定区分はLesson完了時に保存。過去に原文記録のない回答は復元不可。CSVは進捗またはGPT画面から保存。意味の自動判定ではありません。
